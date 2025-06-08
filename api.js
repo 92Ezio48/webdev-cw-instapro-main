@@ -1,10 +1,10 @@
 // Замени на свой, чтобы получить независимый от других набор данных.
 // "боевая" версия инстапро лежит в ключе prod
-const personalKey = "prod";
+const personalKey = "V.Korolyov";
 const baseHost = "https://webdev-hw-api.vercel.app";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
-
 export function getPosts({ token }) {
+  console.log("Посты получены");
   return fetch(postsHost, {
     method: "GET",
     headers: {
@@ -22,7 +22,6 @@ export function getPosts({ token }) {
       return data.posts;
     });
 }
-
 export function registerUser({ login, password, name, imageUrl }) {
   return fetch(baseHost + "/api/user", {
     method: "POST",
@@ -47,12 +46,16 @@ export function loginUser({ login, password }) {
       login,
       password,
     }),
-  }).then((response) => {
-    if (response.status === 400) {
-      throw new Error("Неверный логин или пароль");
-    }
-    return response.json();
-  });
+  })
+    .then((response) => {
+      if (response.status === 400) {
+        throw new Error("Неверный логин или пароль");
+      }
+      return response.json();
+    })
+    .then((responseData) => {
+      console.log(responseData.user._id);
+    });
 }
 
 // Загружает картинку в облако, возвращает url загруженной картинки

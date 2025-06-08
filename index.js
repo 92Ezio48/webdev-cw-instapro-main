@@ -53,7 +53,6 @@ export const goToPage = (newPage, data) => {
     if (newPage === POSTS_PAGE) {
       page = LOADING_PAGE;
       renderApp();
-
       return getPosts({ token: getToken() })
         .then((newPosts) => {
           page = POSTS_PAGE;
@@ -83,7 +82,7 @@ export const goToPage = (newPage, data) => {
   throw new Error("страницы не существует");
 };
 
-const renderApp = () => {
+export const renderApp = () => {
   const appEl = document.getElementById("app");
   if (page === LOADING_PAGE) {
     return renderLoadingPageComponent({
