@@ -3,6 +3,11 @@
 const personalKey = "V.Korolyov";
 const baseHost = "https://webdev-hw-api.vercel.app";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
+export let _id = "";
+export let updateID = (newID) => {
+  _id = newID;
+  console.log(_id);
+};
 export function getPosts({ token }) {
   console.log("Посты получены");
   return fetch(postsHost, {
@@ -46,16 +51,12 @@ export function loginUser({ login, password }) {
       login,
       password,
     }),
-  })
-    .then((response) => {
-      if (response.status === 400) {
-        throw new Error("Неверный логин или пароль");
-      }
-      return response.json();
-    })
-    .then((responseData) => {
-      console.log(responseData.user._id);
-    });
+  }).then((response) => {
+    if (response.status === 400) {
+      throw new Error("Неверный логин или пароль");
+    }
+    return response.json();
+  });
 }
 
 // Загружает картинку в облако, возвращает url загруженной картинки
