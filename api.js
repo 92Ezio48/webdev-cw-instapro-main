@@ -71,3 +71,14 @@ export function uploadImage({ file }) {
     return response.json();
   });
 }
+
+export function getUserPosts() {
+  return fetch(baseHost + `/user-posts/${_id}`, {
+    method: "GET",
+  }).then((response) => {
+    if (response.status === 400) {
+      throw new Error("Неверный логин или пароль");
+    }
+    return response.json();
+  });
+}
