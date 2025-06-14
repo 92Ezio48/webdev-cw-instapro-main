@@ -1,4 +1,5 @@
 import { _id } from "../api.js";
+import { getToken } from "../index.js";
 import { addNewPost } from "../api.js";
 export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
   const render = () => {
@@ -48,7 +49,7 @@ export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
         ],
         isLiked: false,
       };
-      addNewPost(newPost)
+      addNewPost({ token: getToken() })
         .then((response) => {
           if (response.status === 201) {
             return response.json();
