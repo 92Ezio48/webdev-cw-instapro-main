@@ -1,4 +1,4 @@
-import { getPosts } from "./api.js";
+import { getPosts } from "../api.js";
 import { renderAddPostPageComponent } from "./components/add-post-page-component.js";
 import { renderAuthPageComponent } from "./components/auth-page-component.js";
 import {
@@ -15,8 +15,7 @@ import {
   removeUserFromLocalStorage,
   saveUserToLocalStorage,
 } from "./helpers.js";
-import { getUserPosts } from "./api.js";
-
+import { getAllPosts } from "./api.js";
 export let user = getUserFromLocalStorage();
 export let page = null;
 export let posts = [];
@@ -70,17 +69,7 @@ export const goToPage = (newPage, data) => {
       console.log("Открываю страницу пользователя: ", data.userId);
       page = USER_POSTS_PAGE;
       posts = [];
-      renderApp();
-      return getUserPosts({})
-        .then((newPosts) => {
-          page = USER_POSTS_PAGE;
-          posts = newPosts;
-          renderApp();
-        })
-        .catch((error) => {
-          console.error(error);
-          goToPage(USER_POSTS_PAGE);
-        });
+      return renderApp();
     }
 
     page = newPage;
@@ -140,3 +129,4 @@ export const renderApp = () => {
 };
 
 goToPage(POSTS_PAGE);
+getAllPosts();
