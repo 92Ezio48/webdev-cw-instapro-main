@@ -5,7 +5,6 @@ const baseHost = "https://webdev-hw-api.vercel.app";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
 import { updatePosts } from "./index.js";
 import { renderApp } from "./index.js";
-import { renderPosts } from "./renderPostsFunction.js";
 export let _id = "";
 export let updateID = (newID) => {
   _id = newID;
@@ -100,7 +99,6 @@ export function getAllPosts() {
       console.log(data);
       updatePosts(data.posts);
       renderApp();
-      renderPosts();
     });
 }
 

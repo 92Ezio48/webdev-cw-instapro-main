@@ -1,4 +1,3 @@
-import { posts } from "./postsData.js";
 export const list = document.getElementById("appPosts");
 console.log(list);
 export const renderPosts = () => {
