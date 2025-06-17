@@ -87,6 +87,7 @@ export const goToPage = (newPage, data) => {
 
 export const renderApp = () => {
   const appEl = document.getElementById("app");
+  const list = document.getElementById("appPosts");
   if (page === LOADING_PAGE) {
     return renderLoadingPageComponent({
       appEl,
@@ -122,6 +123,7 @@ export const renderApp = () => {
   if (page === POSTS_PAGE) {
     return renderPostsPageComponent({
       appEl,
+      list,
     });
   }
 

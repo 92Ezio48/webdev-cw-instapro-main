@@ -8,13 +8,14 @@ export function renderPostsPageComponent({ appEl }) {
   if (Array.isArray(posts)) {
     const postsHtml = posts
 
-      .map((post) => {
-        `<div class="page-container">
+      .map(
+        (post) =>
+          `<div class="page-container">
                   <div class="header-container"></div>
                   <ul class="posts">
                     <li class="post">
                       <div class="post-header" data-user-id="${post.user.id}">
-                          <img src="${post.imageUrl}" class="post-header__user-image">
+                          <img src="${post.user.imageUrl}" class="post-header__user-image">
                           <p class="post-header__user-name">${post.user.name}</p>
                       </div>
                       <div class="post-image-container">
@@ -35,12 +36,10 @@ export function renderPostsPageComponent({ appEl }) {
                       <p class="post-date">
                         19 минут назад
                       </p>
-                    </li>`;
-      })
+                    </li>`
+      )
       .join(``);
     list.innerHTML = postsHtml;
-    console.log(postsHtml);
-    console.log(list);
   }
 
   console.log("Актуальный список постов:", posts);

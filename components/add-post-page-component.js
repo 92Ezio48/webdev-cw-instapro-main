@@ -1,6 +1,7 @@
 import { _id } from "../api.js";
 import { getToken } from "../index.js";
 import { addNewPost } from "../api.js";
+import { posts, goToPage } from "../index.js";
 export function renderAddPostPageComponent({ appEl, onAddPostClick }) {
   const render = () => {
     // @TODO: Реализовать страницу добавления поста
