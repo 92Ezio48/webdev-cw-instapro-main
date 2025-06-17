@@ -100,7 +100,7 @@ export function getAllPosts() {
       updatePosts(data.posts);
       renderApp();
     });
-}
+}  
 
 export function addNewPost({ token }) {
   const data = JSON.stringify({
