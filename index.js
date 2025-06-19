@@ -16,6 +16,8 @@ import {
   saveUserToLocalStorage,
 } from "./helpers.js";
 import { getAllPosts } from "./api.js";
+import { addNewPost } from "../api.js";
+import { postImage } from "../api.js";
 export let user = getUserFromLocalStorage();
 export let page = null;
 export let posts = [];
@@ -25,7 +27,7 @@ export const updatePosts = (newPosts) => {
 };
 
 export const getToken = () => {
-  const token = user ? `Bearer ${user.token}` : undefined;
+  const token = user ? `${user.token}` : undefined;
   return token;
 };
 
@@ -70,7 +72,7 @@ export const goToPage = (newPage, data) => {
     }
 
     if (newPage === USER_POSTS_PAGE) {
-      console.log("Открываю страницу пользователя: ", data.userId);
+      console.log("Открываю страницу пользователя: ", user.name);
       page = USER_POSTS_PAGE;
       posts = [];
       return renderApp();
@@ -112,11 +114,28 @@ export const renderApp = () => {
   if (page === ADD_POSTS_PAGE) {
     return renderAddPostPageComponent({
       appEl,
-      onAddPostClick({ description, imageUrl }) {
-        // @TODO: реализовать добавление поста в API
-        console.log("Добавляю пост...", { description, imageUrl });
-        goToPage(POSTS_PAGE);
+      onAddPostClick({ description, imageFile }) {
+        console.log("Добавляю пост...", { description, imageFile });
+
+        postImage({ file: imageFile })
+          .then((imageUrl) => {
+            console.log("URL загруженного изображения:", imageUrl);
+
+            return addNewPost({
+              token: getToken(),
+              description: description,
+              imageUrl: imageUrl, // ✅ передаём URL
+            });
+          })
+          .then(() => {
+            console.log("Пост успешно добавлен");
+          })
+          .catch((error) => {
+            alert("Не удалось загрузить пост");
+            console.error(error);
+          });
       },
+      token: user.token,
     });
   }
 

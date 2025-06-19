@@ -1,7 +1,7 @@
 // Замени на свой, чтобы получить независимый от других набор данных.
 // "боевая" версия инстапро лежит в ключе prod
 const personalKey = "V.Korolyov";
-const baseHost = "https://webdev-hw-api.vercel.app";
+export const baseHost = "https://webdev-hw-api.vercel.app";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
 import { updatePosts } from "./index.js";
 import { renderApp } from "./index.js";
@@ -84,7 +84,6 @@ export function getUserPosts() {
     return response.json();
   });
 }
-
 export function getAllPosts() {
   return fetch(`https://wedev-api.sky.pro/api/v1/V.Korolyov/instapro/`, {
     method: "GET",
@@ -100,27 +99,42 @@ export function getAllPosts() {
       updatePosts(data.posts);
       renderApp();
     });
-}  
+}
 
-export function addNewPost({ token }) {
-  const data = JSON.stringify({
-    description: `Этот котик очень красивый`,
-    imageUrl: `https://storage.yandexcloud.net/skypro-webdev-homework-bucket/1680601502867-%25C3%2590%25C2%25A1%25C3%2590%25C2%25BD%25C3%2590%25C2%25B8%25C3%2590%25C2%25BC%25C3%2590%25C2%25BE%25C3%2590%25C2%25BA%2520%25C3%2591%25C2%258D%25C3%2590%25C2%25BA%25C3%2591%25C2%2580%25C3%2590%25C2%25B0%25C3%2590%25C2%25BD%25C3%2590%25C2%25B0%25202023-04-04%2520%25C3%2590%25C2%25B2%252014.04.29.png`,
-  });
-  return fetch(`https://wedev-api.sky.pro/api/v1/V.Korolyov/instapro/`, {
+export function addNewPost({ token, description, imageUrl }) {
+  return fetch("https://wedev-api.sky.pro/api/v1/V.Korolyov/instapro", {
     method: "POST",
     headers: {
-      Authorization: token,
+      Authorization: `Bearer ${token}`,
     },
-    body: data,
+    body: JSON.stringify({
+      description,
+      imageUrl, // ✅ передаём ссылку на изображение, а не сам файл
+    }),
   }).then((response) => {
-    if (response.status === 400) {
-      throw new Error("Неверный запрос");
-    } else {
-      if (response.status === 401) {
-        throw new Error("Необходима авторизация!");
-      }
+    if (!response.ok) {
+      throw new Error("Ошибка при добавлении поста");
     }
     return response.json();
   });
+}
+
+export function postImage({ file }) {
+  const data = new FormData();
+  data.append("file", file);
+
+  return fetch("https://wedev-api.sky.pro/api/upload/image", {
+    method: "POST",
+    body: data,
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Ошибка при загрузке изображения");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Ответ от сервера при загрузке:", data);
+      return data.fileUrl; // должен быть https://wedev-api.sky.pro/uploads/abc.jpg
+    });
 }

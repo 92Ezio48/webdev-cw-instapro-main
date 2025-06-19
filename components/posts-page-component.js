@@ -1,6 +1,8 @@
 import { USER_POSTS_PAGE } from "../routes.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { posts, goToPage } from "../index.js";
+import { _id } from "../api.js";
+
 export const list = document.getElementById("appPosts");
 console.log(list);
 export function renderPostsPageComponent({ appEl }) {
