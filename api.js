@@ -5,6 +5,7 @@ export const baseHost = "https://webdev-hw-api.vercel.app";
 const postsHost = `${baseHost}/api/v1/${personalKey}/instapro`;
 import { updatePosts } from "./index.js";
 import { renderApp } from "./index.js";
+import { posts } from "./index.js";
 export let _id = "";
 export let updateID = (newID) => {
   _id = newID;
@@ -137,4 +138,24 @@ export function postImage({ file }) {
       console.log("Ответ от сервера при загрузке:", data);
       return data.fileUrl; // должен быть https://wedev-api.sky.pro/uploads/abc.jpg
     });
+}
+
+export function toggleLike({ postId, token, isLiked }) {
+  const method = "POST";
+  const action = isLiked ? "dislike" : "like";
+
+  return fetch(
+    `https://wedev-api.sky.pro/api/v1/V.Korolyov/instapro/${postId}/${action}`,
+    {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  ).then((response) => {
+    if (!response.ok) {
+      throw new Error("Ошибка при переключении лайка");
+    }
+    return response.json(); // возвращает объект { post: { ... } }
+  });
 }

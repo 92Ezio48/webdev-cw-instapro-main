@@ -89,7 +89,6 @@ export const goToPage = (newPage, data) => {
 
 export const renderApp = () => {
   const appEl = document.getElementById("app");
-  const list = document.getElementById("appPosts");
   if (page === LOADING_PAGE) {
     return renderLoadingPageComponent({
       appEl,
@@ -142,13 +141,15 @@ export const renderApp = () => {
   if (page === POSTS_PAGE) {
     return renderPostsPageComponent({
       appEl,
-      list,
+      posts,
     });
   }
 
   if (page === USER_POSTS_PAGE) {
-    // @TODO: реализовать страницу с фотографиями отдельного пользвателя
-    appEl.innerHTML = "Здесь будет страница фотографий пользователя";
+    const userName = user.name; // ⚠️ Подставь реальное имя из данных пользователя
+    appEl.innerHTML = `
+    <h2>Страница пользователя: ${userName}</h2>
+  `;
     return;
   }
 };
