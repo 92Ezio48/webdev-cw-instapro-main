@@ -9,10 +9,8 @@ import { posts } from "./index.js";
 export let _id = "";
 export let updateID = (newID) => {
   _id = newID;
-  console.log(_id);
 };
 export function getPosts({ token }) {
-  console.log("Посты получены");
   return fetch(postsHost, {
     method: "GET",
     headers: {
@@ -75,14 +73,19 @@ export function uploadImage({ file }) {
   });
 }
 
-export function getUserPosts() {
-  return fetch(baseHost + `/user-posts/${_id}`, {
-    method: "GET",
-  }).then((response) => {
-    if (response.status === 400) {
-      throw new Error("Неверный логин или пароль");
+export function getUserPosts({ userId }) {
+  return fetch(
+    `https://wedev-api.sky.pro/api/v1/V.Korolyov/instapro/user-posts/${userId}`,
+    {
+      method: "GET",
     }
-    return response.json();
+  ).then((response) => {
+    if (!response.ok) {
+      throw new Error("Ошибка при загрузке постов");
+    }
+    return response.json().then((data) => {
+      return data.posts;
+    });
   });
 }
 export function getAllPosts() {
@@ -96,7 +99,6 @@ export function getAllPosts() {
       return response.json();
     })
     .then((data) => {
-      console.log(data);
       updatePosts(data.posts);
       renderApp();
     });
@@ -135,7 +137,6 @@ export function postImage({ file }) {
       return response.json();
     })
     .then((data) => {
-      console.log("Ответ от сервера при загрузке:", data);
       return data.fileUrl; // должен быть https://wedev-api.sky.pro/uploads/abc.jpg
     });
 }

@@ -120,7 +120,6 @@ export function renderAuthPageComponent({ appEl, setUser }) {
           .then((user) => {
             setUser(user.user);
             updateID(user.user._id);
-            console.log(user.user._id);
           })
           .catch((error) => {
             console.warn(error);

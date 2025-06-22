@@ -9,13 +9,18 @@ import { getToken } from "../index.js";
 import { renderApp } from "../index.js";
 const postDate = new Date("2024-06-01T10:00:00Z");
 const result = formatDistanceToNow(postDate, { addSuffix: true, locale: ru });
-console.log(result);
 export function renderPostsPageComponent({ appEl }) {
-  appEl.innerHTML = `<div id="appPosts"></div>`; // перерисовываем
+  appEl.innerHTML = `<div id="appPosts"></div>`;
   const list = document.getElementById("appPosts");
 
+  // Функция экранирования HTML
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
   if (Array.isArray(posts)) {
-    // Создаем один раз header и ul
     const postsHtml = posts
       .map((post) => {
         const formattedDate = formatDistanceToNow(new Date(post.createdAt), {
@@ -23,11 +28,14 @@ export function renderPostsPageComponent({ appEl }) {
           locale: ru,
         });
 
+        const escapedName = escapeHtml(post.user.name);
+        const escapedDescription = escapeHtml(post.description);
+
         return `
           <li class="post">
             <div class="post-header" data-user-id="${post.user.id}">
               <img src="${post.user.imageUrl}" class="post-header__user-image">
-              <p class="post-header__user-name">${post.user.name}</p>
+              <p class="post-header__user-name">${escapedName}</p>
             </div>
             <div class="post-image-container">
               <img class="post-image" src="${post.imageUrl}">
@@ -47,8 +55,8 @@ export function renderPostsPageComponent({ appEl }) {
               </p>
             </div>
             <p class="post-text">
-              <span class="user-name">${post.user.name}</span>
-              ${post.description}
+              <span class="user-name">${escapedName}</span>
+              ${escapedDescription}
             </p>
             <p class="post-date">${formattedDate}</p>
           </li>
@@ -56,7 +64,6 @@ export function renderPostsPageComponent({ appEl }) {
       })
       .join("");
 
-    // Добавляем один раз wrapper
     list.innerHTML = `
       <div class="page-container">
         <div class="header-container"></div>
@@ -65,12 +72,10 @@ export function renderPostsPageComponent({ appEl }) {
     `;
   }
 
-  // Отрисовываем header
   renderHeaderComponent({
     element: document.querySelector(".header-container"),
   });
 
-  // Переход на страницу пользователя
   document.querySelectorAll(".post-header").forEach((userEl) => {
     userEl.addEventListener("click", () => {
       goToPage(USER_POSTS_PAGE, {
@@ -79,7 +84,6 @@ export function renderPostsPageComponent({ appEl }) {
     });
   });
 
-  // Обработка лайка
   document.querySelectorAll(".like-button").forEach((btn) => {
     btn.addEventListener("click", () => {
       const postId = btn.dataset.postId;
@@ -104,11 +108,11 @@ export function renderPostsPageComponent({ appEl }) {
             posts[index] = updatedPost;
           }
 
-          renderApp(); // обновление
+          renderApp();
         })
         .catch((error) => {
           console.error("Ошибка при лайке:", error);
-          alert("Не удалось поставить лайк");
+          alert("Требуется авторизация, чтобы поставить лайк");
         });
     });
   });

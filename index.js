@@ -18,9 +18,22 @@ import {
 import { getAllPosts } from "./api.js";
 import { addNewPost } from "../api.js";
 import { postImage } from "../api.js";
+import { renderHeaderComponent } from "./components/header-component.js";
+import { getUserPosts } from "../api.js";
+import { formatDistanceToNow } from "https://cdn.skypack.dev/date-fns";
+import { ru } from "https://cdn.skypack.dev/date-fns/locale";
 export let user = getUserFromLocalStorage();
 export let page = null;
 export let posts = [];
+
+function escapeHtml(str) {
+  return str
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
 export const updatePosts = (newPosts) => {
   posts = newPosts;
@@ -40,7 +53,7 @@ export const logout = () => {
 /**
  * Включает страницу приложения
  */
-export const goToPage = (newPage, data) => {
+export const goToPage = (newPage, data = {}) => {
   if (
     [
       POSTS_PAGE,
@@ -72,10 +85,9 @@ export const goToPage = (newPage, data) => {
     }
 
     if (newPage === USER_POSTS_PAGE) {
-      console.log("Открываю страницу пользователя: ", user.name);
       page = USER_POSTS_PAGE;
       posts = [];
-      return renderApp();
+      return renderApp(data);
     }
 
     page = newPage;
@@ -87,7 +99,7 @@ export const goToPage = (newPage, data) => {
   throw new Error("страницы не существует");
 };
 
-export const renderApp = () => {
+export const renderApp = (pageData = {}) => {
   const appEl = document.getElementById("app");
   if (page === LOADING_PAGE) {
     return renderLoadingPageComponent({
@@ -113,26 +125,22 @@ export const renderApp = () => {
   if (page === ADD_POSTS_PAGE) {
     return renderAddPostPageComponent({
       appEl,
-      onAddPostClick({ description, imageFile }) {
-        console.log("Добавляю пост...", { description, imageFile });
+      onAddPostClick: async ({ description, imageFile }) => {
+        try {
+          const imageUrl = await postImage({ file: imageFile });
 
-        postImage({ file: imageFile })
-          .then((imageUrl) => {
-            console.log("URL загруженного изображения:", imageUrl);
-
-            return addNewPost({
-              token: getToken(),
-              description: description,
-              imageUrl: imageUrl, // ✅ передаём URL
-            });
-          })
-          .then(() => {
-            console.log("Пост успешно добавлен");
-          })
-          .catch((error) => {
-            alert("Не удалось загрузить пост");
-            console.error(error);
+          await addNewPost({
+            token: getToken(),
+            description,
+            imageUrl,
           });
+
+          // ✅ Переход на страницу постов с обновлением
+          goToPage(POSTS_PAGE);
+        } catch (error) {
+          alert("Не удалось загрузить пост");
+          console.error(error);
+        }
       },
       token: user.token,
     });
@@ -146,10 +154,103 @@ export const renderApp = () => {
   }
 
   if (page === USER_POSTS_PAGE) {
-    const userName = user.name; // ⚠️ Подставь реальное имя из данных пользователя
+    const userId = pageData.userId;
     appEl.innerHTML = `
-    <h2>Страница пользователя: ${userName}</h2>
+    <div class="page-container">
+      <div class="header-container"></div>
+      <h2>Загрузка...</h2>
+    </div>
   `;
+
+    renderHeaderComponent({
+      element: document.querySelector(".header-container"),
+    });
+
+    getUserPosts({ userId })
+      .then((userPosts) => {
+        const userName = escapeHtml(userPosts[0]?.user.name || "Пользователь");
+
+        const postsHtml = userPosts
+          .map((post) => {
+            const formattedDate = formatDistanceToNow(
+              new Date(post.createdAt),
+              {
+                addSuffix: true,
+                locale: ru,
+              }
+            );
+
+            const escapedUserName = escapeHtml(post.user.name);
+            const escapedDescription = escapeHtml(post.description);
+
+            return `
+<li class="post">
+  <div class="post-header" data-user-id="${post.user.id}">
+    <img src="${post.user.imageUrl}" class="post-header__user-image">
+    <p class="post-header__user-name">${escapedUserName}</p>
+  </div>
+  <div class="post-image-container">
+    <img class="post-image" src="${post.imageUrl}">
+  </div>
+  <div class="post-likes">
+    <p class="post-likes-text">Нравится: <strong>${
+      post.likes.length
+    }</strong></p>
+  </div>
+  <p class="post-text">
+    <span class="user-name">${escapedUserName}</span>
+    ${escapedDescription}
+  </p>
+  ${
+    post.tags && post.tags.length > 0
+      ? `
+    <div class="post-tags">
+      <strong>Теги:</strong>
+      ${post.tags
+        .map((tag) => `<span class="tag">#${escapeHtml(tag)}</span>`)
+        .join(" ")}
+    </div>
+  `
+      : ""
+  }
+  <p class="post-date">${formattedDate}</p>
+</li>
+`;
+          })
+          .join("");
+
+        appEl.innerHTML = `
+        <div class="page-container">
+          <div class="header-container"></div>
+          <h2>Страница пользователя: ${userName}</h2>
+          <ul class="posts">${postsHtml}</ul>
+        </div>
+      `;
+
+        renderHeaderComponent({
+          element: document.querySelector(".header-container"),
+        });
+        document.querySelectorAll(".post-header").forEach((element) => {
+          element.addEventListener("click", () => {
+            const userId = element.dataset.userId;
+            goToPage(USER_POSTS_PAGE, { userId });
+          });
+        });
+      })
+      .catch((error) => {
+        console.error("Ошибка загрузки постов пользователя:", error);
+        appEl.innerHTML = `
+        <div class="page-container">
+          <div class="header-container"></div>
+          <h2>Ошибка загрузки постов пользователя</h2>
+        </div>
+      `;
+
+        renderHeaderComponent({
+          element: document.querySelector(".header-container"),
+        });
+      });
+
     return;
   }
 };
