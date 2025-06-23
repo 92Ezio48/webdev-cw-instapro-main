@@ -1,6 +1,7 @@
 import { loginUser, registerUser } from "../api.js";
 import { renderHeaderComponent } from "./header-component.js";
 import { renderUploadImageComponent } from "./upload-image-component.js";
+import { updateID } from "../api.js";
 
 /**
  * Компонент страницы авторизации.
@@ -118,6 +119,7 @@ export function renderAuthPageComponent({ appEl, setUser }) {
         loginUser({ login, password })
           .then((user) => {
             setUser(user.user);
+            updateID(user.user._id);
           })
           .catch((error) => {
             console.warn(error);
